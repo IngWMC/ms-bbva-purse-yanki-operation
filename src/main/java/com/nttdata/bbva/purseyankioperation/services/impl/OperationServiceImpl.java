@@ -3,6 +3,7 @@ package com.nttdata.bbva.purseyankioperation.services.impl;
 import com.nttdata.bbva.purseyankioperation.enums.OperationTypeEnum;
 import com.nttdata.bbva.purseyankioperation.models.*;
 import com.nttdata.bbva.purseyankioperation.repositories.IOperationRepository;
+import com.nttdata.bbva.purseyankioperation.services.IOperation;
 import com.nttdata.bbva.purseyankioperation.services.IOperationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,10 +48,12 @@ public class OperationServiceImpl implements IOperationService {
 					.amount(eventOperation.getAmount())
 					.createdAt(LocalDateTime.now()).build();
 
-			BigDecimal totalAmountAvailable = openAccount.getAmountAvailable().subtract(eventOperation.getAmount());
+			IOperation subtract = BigDecimal::subtract;
+			BigDecimal totalAmountAvailable = subtract.calculate(openAccount.getAmountAvailable(), eventOperation.getAmount());
 			openAccount.setAmountAvailable(totalAmountAvailable);
 
-			BigDecimal totalAmountAvailableTransfer = openAccountTransfer.getAmountAvailable().add(eventOperation.getAmount());
+			IOperation add = BigDecimal::add;
+			BigDecimal totalAmountAvailableTransfer = add.calculate(openAccountTransfer.getAmountAvailable(), eventOperation.getAmount());
 			openAccountTransfer.setAmountAvailable(totalAmountAvailableTransfer);
 
 			logger.info("ConsumerServiceImpl ::: before-openAccount ::: {}", openAccount.toString());
